@@ -23,7 +23,7 @@ use mongodb::{options::ClientOptions, Client};
 
 #[derive(Debug)]
 pub struct AppState {
-    env: Config,
+    conf: Config,
     db: mongodb::Database,
 }
 
@@ -31,10 +31,10 @@ pub struct AppState {
 async fn main() {
     dotenv().ok();
 
-    let config = Config::init();
+    let config = config::load();
 
-    let database_url = &config.database_url;
-    let database_name = &config.database_name;
+    let database_url = &config.database.url;
+    let database_name = &config.database.name;
 
     // File config
     let configured = filesconfig::config().await;
@@ -76,7 +76,7 @@ async fn main() {
 
     let app = create_router(Arc::new(AppState {
         db: db,
-        env: config.clone(),
+        conf: config.clone(),
     }))
     .layer(cors);
 
