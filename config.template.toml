@@ -1,0 +1,13 @@
+[database]
+url = "database_url"
+name = "database_name"
+
+[jwt]
+user_secret = "jwt_user_secret"
+service_secret = "jwt_service_secret"
+user_max_age = 3600
+
+[security]
+password_salt = "password_salt"
+root_user_password = "root_user_password"
+auto_update_root_user = true
