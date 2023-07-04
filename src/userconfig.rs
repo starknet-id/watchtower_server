@@ -6,17 +6,17 @@ use mongodb::bson::{doc, Document};
 
 use crate::config::Config;
 
-pub async fn config(db: mongodb::Database) -> bool {
+pub async fn config(config: Config, db: mongodb::Database) -> bool {
     let users_collections = db.collection("users");
     let user: Option<Document> = users_collections
         .find_one(None, None)
         .await
         .expect("Failed to get user");
 
-    let config = Config::init();
-    let root_user_password = config.root_user_password;
+    let config = config.clone();
+    let root_user_password = config.security.root_user_password;
     // hash password
-    let salt = SaltString::encode_b64(&config.password_salt.as_bytes()).unwrap();
+    let salt = SaltString::encode_b64(&config.security.password_salt.as_bytes()).unwrap();
     let argon2 = Argon2::default();
     let password_hash = argon2
         .hash_password(root_user_password.as_bytes(), &salt)
@@ -28,7 +28,7 @@ pub async fn config(db: mongodb::Database) -> bool {
         users_collections.insert_one(user, None).await.unwrap();
         println!("👤 Created root user");
     } else {
-        let auto_update_root_user = config.auto_update_root_user;
+        let auto_update_root_user = config.security.auto_update_root_user;
         if auto_update_root_user {
             users_collections
                 .update_one(

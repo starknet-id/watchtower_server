@@ -24,7 +24,7 @@ pub async fn add_user_handler(
     Json(body): Json<AddUserInput>,
 ) -> impl IntoResponse {
     let token = body.token;
-    let valid = check_auth_token(token.clone());
+    let valid = check_auth_token(app_state.clone(), token.clone());
     if !valid {
         let json_response = serde_json::json!({
             "status": "error",
@@ -35,7 +35,7 @@ pub async fn add_user_handler(
         return Json(json_response);
     }
 
-    let token_data = get_token_data(token);
+    let token_data = get_token_data(app_state.clone(), token);
 
     let has_perm = has_permission(
         token_data.user_id,
@@ -57,7 +57,7 @@ pub async fn add_user_handler(
     let username = body.username;
     let password = body.password;
     // hash password
-    let password_hash = hash_password(password.clone());
+    let password_hash = hash_password(app_state.clone(), password.clone());
     // check if user already exists
     let db = &app_state.db;
     let user: Option<mongodb::bson::Document> = db

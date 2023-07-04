@@ -46,7 +46,7 @@ pub async fn add_message_handler(
     }
 
     let mut log = body.log;
-    let token_data = Some(get_service_token_data(token.clone()));
+    let token_data = Some(get_service_token_data(app_state.clone(), token.clone()));
     let token_app_id = token_data.unwrap().unwrap().app_id;
     let app_id = log.app_id.clone().unwrap();
 

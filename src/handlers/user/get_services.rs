@@ -10,7 +10,7 @@ pub async fn get_services_handler(
     Json(body): Json<structs::AuthTokenJSON>,
 ) -> impl IntoResponse {
     let token = body.token;
-    let valid = check_auth_token(token.clone());
+    let valid = check_auth_token(app_state.clone(), token.clone());
     if !valid {
         let json_response = serde_json::json!({
             "status": "error",
