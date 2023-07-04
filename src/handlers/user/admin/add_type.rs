@@ -23,7 +23,7 @@ pub async fn add_type_handler(
     Json(body): Json<AddTypeInput>,
 ) -> impl IntoResponse {
     let token = body.token;
-    let valid = check_auth_token(token.clone());
+    let valid = check_auth_token(app_state.clone(), token.clone());
     if !valid {
         let json_response = serde_json::json!({
             "status": "error",
@@ -34,7 +34,7 @@ pub async fn add_type_handler(
         return Json(json_response);
     }
 
-    let token_data = get_token_data(token);
+    let token_data = get_token_data(app_state.clone(), token);
 
     let has_perm = has_permission(
         token_data.user_id,

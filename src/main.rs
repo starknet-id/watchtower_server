@@ -48,7 +48,7 @@ async fn main() {
     let client_options = ClientOptions::parse(database_url).await.unwrap();
     let client = Client::with_options(client_options).unwrap();
 
-    let configured = dbconfig::config(client.clone()).await;
+    let configured = dbconfig::config(config.clone(), client.clone()).await;
 
     if configured != true {
         println!("❌ Failed to configure database");
@@ -60,7 +60,7 @@ async fn main() {
     println!("🔌 Connected to MongoDB");
 
     // root user :
-    userconfig::config(db.clone()).await;
+    userconfig::config(config.clone(), db.clone()).await;
 
     let cors = CorsLayer::new()
         .allow_origin("*".parse::<HeaderValue>().unwrap())
