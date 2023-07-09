@@ -90,3 +90,4 @@ rust-project.json
 .ionide
 
 rustfmt.toml
+config.json

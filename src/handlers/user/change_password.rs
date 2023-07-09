@@ -23,7 +23,7 @@ pub async fn change_password_handler(
     Json(body): Json<ChangePasswordInput>,
 ) -> impl IntoResponse {
     let token = body.token;
-    let valid = check_auth_token(token.clone());
+    let valid = check_auth_token(app_state.clone(), token.clone());
     if !valid {
         let json_response = serde_json::json!({
             "status": "error",
@@ -34,11 +34,11 @@ pub async fn change_password_handler(
         return Json(json_response);
     }
 
-    let token_data = get_token_data(token);
+    let token_data = get_token_data(app_state.clone(), token);
     let user_id = token_data.user_id;
 
     let new_password = body.new_password;
-    let password_hash = hash_password(new_password);
+    let password_hash = hash_password(app_state.clone(), new_password);
 
     let db = &app_state.db;
     let object_id = mongodb::bson::oid::ObjectId::parse_str(&user_id).unwrap();
