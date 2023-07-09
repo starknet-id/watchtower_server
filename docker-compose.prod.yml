@@ -1,9 +1,11 @@
 version: "3"
 services:
   watch_tower_server:
+    restart: always
     build: 
       context: .
       dockerfile: Dockerfile
     command: ./target/release/watch-tower
     ports:
       - 8000:8000
+
