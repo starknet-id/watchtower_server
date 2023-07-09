@@ -1,4 +1,5 @@
 version: "3"
+
 services:
   watch_tower_server:
     build: 
