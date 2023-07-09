@@ -6,7 +6,7 @@ use mongodb::bson::{doc, Document};
 use serde::Deserialize;
 
 use crate::{
-    config, structs,
+    structs,
     utils::{
         check_auth_token::check_auth_token, get_token_data::get_token_data,
         has_permission::has_permission,
@@ -25,7 +25,7 @@ pub async fn regenerate_service_token_handler(
     Json(body): Json<RegenerateServiceTokenInput>,
 ) -> impl IntoResponse {
     let token = body.token;
-    let valid = check_auth_token(token.clone());
+    let valid = check_auth_token(app_state.clone(), token.clone());
     if !valid {
         let json_response = serde_json::json!({
             "status": "error",
@@ -36,7 +36,7 @@ pub async fn regenerate_service_token_handler(
         return Json(json_response);
     }
 
-    let token_data = get_token_data(token);
+    let token_data = get_token_data(app_state.clone(), token);
 
     let has_perm = has_permission(
         token_data.user_id,
@@ -57,8 +57,8 @@ pub async fn regenerate_service_token_handler(
 
     let app_id = body.app_id;
 
-    let config = config::Config::init();
-    let jwt_secret = config.jwt_service_secret;
+    let config = app_state.conf.clone();
+    let jwt_secret = config.jwt.service_secret;
 
     let date = chrono::Utc::now().timestamp();
 

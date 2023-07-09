@@ -14,7 +14,7 @@ pub async fn get_permissions_handler(
     Json(body): Json<structs::AuthTokenJSON>,
 ) -> impl IntoResponse {
     let token = body.token;
-    let valid = check_auth_token(token.clone());
+    let valid = check_auth_token(app_state.clone(), token.clone());
     if !valid {
         let json_response = serde_json::json!({
             "status": "error",
@@ -25,7 +25,7 @@ pub async fn get_permissions_handler(
         return Json(json_response);
     }
 
-    let token_data = get_token_data(token.clone());
+    let token_data = get_token_data(app_state.clone(), token.clone());
     let user_id = mongodb::bson::oid::ObjectId::parse_str(&token_data.user_id).unwrap();
 
     // get from mongodb

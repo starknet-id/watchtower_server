@@ -1,10 +1,14 @@
+use std::sync::Arc;
+
 use jsonwebtoken::{decode, DecodingKey, Validation};
 
-use crate::{config::Config, structs::JwtUserClaims};
+use crate::AppState;
 
-pub fn get_token_data(jwt_token: String) -> JwtUserClaims {
-    let config = Config::init();
-    let jwt_secret = &config.jwt_user_secret;
+use crate::structs::JwtUserClaims;
+
+pub fn get_token_data(app_state: Arc<AppState>, jwt_token: String) -> JwtUserClaims {
+    let config = app_state.conf.clone();
+    let jwt_secret = &config.jwt.user_secret;
 
     let token_data = decode::<JwtUserClaims>(
         &jwt_token,

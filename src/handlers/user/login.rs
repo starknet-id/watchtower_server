@@ -10,8 +10,6 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use mongodb::bson::{doc, Document};
 use serde::Deserialize;
 
-use crate::config::Config;
-
 use crate::structs;
 
 use crate::AppState;
@@ -25,12 +23,12 @@ pub async fn login_handler(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginInput>,
 ) -> impl IntoResponse {
-    let config = Config::init();
+    let config = app_state.conf.clone();
 
     let username = body.username;
     let password = body.password;
     // hash password
-    let salt = SaltString::encode_b64(&config.password_salt.as_bytes()).unwrap();
+    let salt = SaltString::encode_b64(&config.security.password_salt.as_bytes()).unwrap();
     let argon2 = Argon2::default();
     let password_hash = argon2
         .hash_password(password.as_bytes(), &salt)
@@ -58,8 +56,8 @@ pub async fn login_handler(
         return Json(json_response);
     }
     // if user is found
-    let jwt_secret = &config.jwt_user_secret;
-    let jwt_user_max_age = &config.jwt_user_max_age;
+    let jwt_secret = &config.jwt.user_secret;
+    let jwt_user_max_age = &config.jwt.user_max_age;
 
     // get date in 'jwt_user_max_age' days
     let date = chrono::Utc::now() + chrono::Duration::days(*jwt_user_max_age as i64);

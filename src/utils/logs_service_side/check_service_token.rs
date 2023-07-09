@@ -3,11 +3,11 @@ use std::sync::Arc;
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use mongodb::bson::doc;
 
-use crate::{config::Config, structs::JwtServiceClaims, AppState};
+use crate::{structs::JwtServiceClaims, AppState};
 
 pub async fn check_service_token(appstate: Arc<AppState>, jwt_token: String) -> bool {
-    let config = Config::init();
-    let jwt_secret = &config.jwt_service_secret;
+    let config = appstate.conf.clone();
+    let jwt_secret = &config.jwt.service_secret;
 
     let token_data = decode::<JwtServiceClaims>(
         &jwt_token,
