@@ -118,25 +118,27 @@ pub async fn add_message_handler(
         if notifications.contains(&"discord".to_string().into()) {
             let config_file = File::open("config.json").unwrap();
             let config: serde_json::Value = serde_json::from_reader(config_file).unwrap();
-            let discord_webhook = config["discord_webhook"].as_str().unwrap();
+            let discord_webhook = config["discord_webhook"].as_str();
+            if !discord_webhook.is_none() {
+                let discord_webhook = discord_webhook.unwrap();
+                let message = format!(
+                    "<t:{}> __{}__\n**{}**\n{}\n➡️ [open](https://watch-t.vercel.app/dashboard?page=logs&services={}#log_{})",
+                    log.timestamp.unwrap(),
+                    service.get("app_name").unwrap().as_str().unwrap(),
+                    log.r#type.unwrap(),
+                    log.message,
+                    log.app_id.unwrap(),
+                    res.inserted_id.as_object_id().unwrap().to_hex()
+                );
 
-            let message = format!(
-            "<t:{}> __{}__\n**{}**\n{}\n➡️ [open](https://watch-t.vercel.app/dashboard?page=logs&services={}#log_{})",
-            log.timestamp.unwrap(),
-            service.get("app_name").unwrap().as_str().unwrap(),
-            log.r#type.unwrap(),
-            log.message,
-            log.app_id.unwrap(),
-            res.inserted_id.as_object_id().unwrap().to_hex()
-        );
-
-            let client = reqwest::Client::new();
-            client
-                .post(discord_webhook)
-                .form(&serde_json::json!({ "content": message }))
-                .send()
-                .await
-                .unwrap();
+                let client = reqwest::Client::new();
+                client
+                    .post(discord_webhook)
+                    .form(&serde_json::json!({ "content": message }))
+                    .send()
+                    .await
+                    .unwrap();
+            }
         }
     }
 
