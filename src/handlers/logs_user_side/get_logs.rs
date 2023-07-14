@@ -68,10 +68,14 @@ async fn get_logs(
     let db = &app_state.db;
     let collection: mongodb::Collection<Document> = db.collection("logs");
 
+    // Do not get logs with deleted field
     let mut cursor = collection
         .find(
             doc! {
-                "app_id": app_id
+                "app_id": app_id,
+                "deleted": {
+                    "$exists": false
+                }
             },
             None,
         )
