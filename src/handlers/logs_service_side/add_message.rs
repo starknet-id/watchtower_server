@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::{extract::State, response::IntoResponse, Json};
 use mongodb::bson::{doc, Document};
+use reqwest::StatusCode;
 use serde::Deserialize;
 use std::fs::File;
 
@@ -36,13 +37,7 @@ pub async fn add_message_handler(
     let valid = check_service_token(app_state.clone(), token.clone()).await;
 
     if !valid {
-        let json_response = serde_json::json!({
-            "status": "error",
-            "message": "Invalid token or token expired",
-            "error_code": "invalid_token"
-        });
-
-        return Json(json_response);
+        return Err((StatusCode::UNAUTHORIZED, "Invalid token or token expired").into_response());
     }
 
     let mut log = body.log;
@@ -51,13 +46,15 @@ pub async fn add_message_handler(
     let app_id = log.app_id.clone().unwrap();
 
     if token_app_id != app_id {
-        let json_response = serde_json::json!({
-            "status": "error",
-            "message": format!("You specified a wrong app_id. You specified {} but your token contains {}",  log.app_id.clone().unwrap(), token_app_id),
-            "error_code": "invalid_app_id"
-        });
-
-        return Json(json_response);
+        return Err((
+            StatusCode::UNAUTHORIZED,
+            format!(
+                "You specified a wrong app_id. You specified {} but your token contains {}",
+                log.app_id.clone().unwrap(),
+                token_app_id
+            ),
+        )
+            .into_response());
     }
 
     let db = &app_state.db;
@@ -146,5 +143,5 @@ pub async fn add_message_handler(
         "status": "success",
     });
 
-    return Json(json_response);
+    return Ok(Json(json_response));
 }

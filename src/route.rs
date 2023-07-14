@@ -98,6 +98,10 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             "/regenerate_service_token",
             post(handlers::logs_user_side::admin::regenerate_service_token::regenerate_service_token_handler),
         )
+        .route(
+            "/delete_log",
+            delete(handlers::logs_user_side::admin::delete_log::delete_log_handler),
+        )
         // Logs service side
         .route(
             "/service/add_message",
