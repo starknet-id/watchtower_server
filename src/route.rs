@@ -31,6 +31,10 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             "/get_services",
             post(handlers::user::get_services::get_services_handler),
         )
+        .route(
+            "/get_types",
+            post(handlers::user::get_types::get_types_handler),
+        )
         // Admin user
         .route(
             "/add_user",
@@ -71,10 +75,6 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route(
             "/delete_type",
             delete(handlers::user::admin::delete_type::delete_type_handler),
-        )
-        .route(
-            "/get_types",
-            post(handlers::user::admin::get_types::get_types_handler),
         )
         .route(
             "/add_type_parent",

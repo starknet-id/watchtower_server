@@ -7,7 +7,6 @@ pub mod delete_type;
 pub mod delete_user;
 pub mod edit_service;
 pub mod edit_type;
-pub mod get_types;
 pub mod get_users;
 pub mod remove_type_parent;
 pub mod set_discord_webhook;
