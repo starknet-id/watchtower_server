@@ -23,10 +23,16 @@ pub struct Security {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+pub struct Connections {
+    pub telegram_token: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct Config {
     pub database: Database,
     pub jwt: JWT,
     pub security: Security,
+    pub connections: Connections,
 }
 
 pub fn load() -> Config {
