@@ -11,3 +11,6 @@ user_max_age = 3600
 password_salt = "password_salt"
 root_user_password = "root_user_password"
 auto_update_root_user = true
+
+[connections]
+telegram_token = "telegram_bot_token"

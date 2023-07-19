@@ -88,6 +88,10 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             "/set_discord_webhook",
             post(handlers::user::admin::set_discord_webhook::set_discord_webhook_handler),
         )
+        .route(
+            "/set_telegram_chat",
+            post(handlers::user::admin::set_telegram_chat::set_telegram_chat_handler),
+        )
         // Logs user side
         .route(
             "/get_logs",

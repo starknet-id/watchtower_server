@@ -107,22 +107,22 @@ pub async fn add_message_handler(
         )
         .await
         .unwrap();
-
+    let conf = app_state.conf.clone();
     if !type_.is_none() {
         let type_ = type_.unwrap();
         let notifications = type_.get("notifications").unwrap().as_array().unwrap();
 
         if notifications.contains(&"discord".to_string().into()) {
             let config_file = File::open("config.json").unwrap();
-            let config: serde_json::Value = serde_json::from_reader(config_file).unwrap();
-            let discord_webhook = config["discord_webhook"].as_str();
+            let config_json: serde_json::Value = serde_json::from_reader(config_file).unwrap();
+            let discord_webhook = config_json["discord_webhook"].as_str();
             if !discord_webhook.is_none() {
                 let discord_webhook = discord_webhook.unwrap();
                 let message = format!(
                     "<t:{}> __{}__\n**{}**\n{}\n➡️ [open](https://watch-t.vercel.app/dashboard?page=logs&services={}#log_{})",
                     log.timestamp.unwrap(),
                     service.get("app_name").unwrap().as_str().unwrap(),
-                    log.r#type.unwrap(),
+                    log.r#type.clone().unwrap(),
                     log.message,
                     log.app_id.unwrap(),
                     res.inserted_id.as_object_id().unwrap().to_hex()
@@ -132,6 +132,35 @@ pub async fn add_message_handler(
                 client
                     .post(discord_webhook)
                     .form(&serde_json::json!({ "content": message }))
+                    .send()
+                    .await
+                    .unwrap();
+            }
+        }
+        if notifications.contains(&"telegram".to_string().into()) {
+            let config_file = File::open("config.json").unwrap();
+            let config_json: serde_json::Value = serde_json::from_reader(config_file).unwrap();
+            let telegram_chat = config_json["telegram_chat"].as_str();
+            if !telegram_chat.is_none() {
+                let telegram_chat = telegram_chat.unwrap();
+                let message = format!(
+                    "<b>{}</b>\n<i>{}</i>\n\n{}",
+                    service.get("app_name").unwrap().as_str().unwrap(),
+                    log.r#type.unwrap(),
+                    log.message
+                );
+
+                let client = reqwest::Client::new();
+                client
+                    .post(format!(
+                        "https://api.telegram.org/bot{}/sendMessage",
+                        conf.connections.telegram_token
+                    ))
+                    .form(&serde_json::json!({
+                        "chat_id": telegram_chat,
+                        "text": message,
+                        "parse_mode": "HTML",
+                    }))
                     .send()
                     .await
                     .unwrap();

@@ -14,14 +14,14 @@ use crate::{
 };
 
 #[derive(Deserialize)]
-pub struct SetDiscordWebhookInput {
+pub struct SetTelegramGroupInput {
     token: String,
-    new_webhook: String,
+    new_group_id: String,
 }
 
-pub async fn set_discord_webhook_handler(
+pub async fn set_telegram_chat_handler(
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<SetDiscordWebhookInput>,
+    Json(body): Json<SetTelegramGroupInput>,
 ) -> impl IntoResponse {
     let token = body.token;
     let valid = check_auth_token(app_state.clone(), token.clone());
@@ -54,12 +54,12 @@ pub async fn set_discord_webhook_handler(
         return Json(json_response);
     }
 
-    let webhook = body.new_webhook;
+    let group_id = body.new_group_id;
 
     // Write in config.json
     let config_file = File::open("config.json").unwrap();
     let mut config: serde_json::Value = serde_json::from_reader(config_file).unwrap();
-    config["discord_webhook"] = serde_json::json!(webhook);
+    config["telegram_chat"] = serde_json::json!(group_id);
     let config_file = File::create("config.json").unwrap();
     serde_json::to_writer_pretty(config_file, &config).unwrap();
 
