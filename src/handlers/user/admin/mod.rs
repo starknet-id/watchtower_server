@@ -10,4 +10,5 @@ pub mod edit_type;
 pub mod get_users;
 pub mod remove_type_parent;
 pub mod set_discord_webhook;
+pub mod set_telegram_chat;
 pub mod set_user_permissions;
