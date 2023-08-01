@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use axum::{extract::State, response::IntoResponse, Json};
-use mongodb::bson::doc;
+use mongodb::{
+    bson::{doc, Document},
+    Collection,
+};
 use serde::Deserialize;
 
 use crate::{
@@ -13,14 +16,16 @@ use crate::{
 };
 
 #[derive(Deserialize)]
-pub struct CreateServiceInput {
+pub struct EditDbInput {
     token: String,
-    app_name: String,
+    db_id: String,
+    name: String,
+    connection_string: String,
 }
 
-pub async fn create_service_handler(
+pub async fn edit_db_handler(
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<CreateServiceInput>,
+    Json(body): Json<EditDbInput>,
 ) -> impl IntoResponse {
     let token = body.token;
     let valid = check_auth_token(app_state.clone(), token.clone());
@@ -53,19 +58,24 @@ pub async fn create_service_handler(
         return Json(json_response);
     }
 
-    let app_name = body.app_name;
+    let db_id = mongodb::bson::oid::ObjectId::parse_str(&body.db_id).unwrap();
+    let db_name = body.name;
+    let connection_string = body.connection_string;
 
-    // insert into mongodb
-    let app = doc! { "app_name": app_name };
     let db = &app_state.db;
-    let res = db
-        .collection("services")
-        .insert_one(app, None)
+    let collection: Collection<Document> = db.collection("databases");
+    collection
+        .update_one(
+            doc! {"_id": db_id.clone()},
+            doc! {"$set": {
+                "name": db_name.clone(),
+                "connection_string": connection_string.clone(),
+            }},
+            None,
+        )
         .await
         .unwrap();
-    let service_id = res.inserted_id.as_object_id().unwrap().to_hex();
     return Json(serde_json::json!({
         "status": "success",
-        "_id": service_id,
     }));
 }

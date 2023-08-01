@@ -117,8 +117,9 @@ async fn get_logs(
         result.push(log);
     }
 
-    let count =
-        (collection.count_documents(filter, None).await.unwrap() - skip) as i64 - limit as i64;
+    let count = (collection.count_documents(filter, None).await.unwrap()) as i64
+        - skip as i64
+        - limit as i64;
     let count = if count < 0 { 0 } else { count } as u64;
 
     return Ok((count, result));
