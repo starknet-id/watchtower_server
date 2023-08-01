@@ -93,3 +93,4 @@ rust-project.json
 
 rustfmt.toml
 config.json
+test.py

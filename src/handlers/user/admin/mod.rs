@@ -2,6 +2,7 @@ pub mod add_type;
 pub mod add_type_parent;
 pub mod add_user;
 pub mod create_service;
+pub mod db;
 pub mod delete_service;
 pub mod delete_type;
 pub mod delete_user;

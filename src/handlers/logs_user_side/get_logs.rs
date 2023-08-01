@@ -11,6 +11,9 @@ pub struct GetLogsInput {
     token: String,
     target_apps: Option<Vec<String>>,
     target_types: Option<Vec<String>>,
+    page_id: u64,
+    page_size: u64,
+    page_amount: u64,
 }
 
 pub async fn get_logs_handler(
@@ -30,32 +33,26 @@ pub async fn get_logs_handler(
     }
     let app_ids = body.target_apps;
     let types = body.target_types;
-    let mut res_logs: std::collections::HashMap<String, Vec<structs::Log>> =
-        std::collections::HashMap::new();
-    for app_id in app_ids.unwrap() {
-        let logs: Vec<structs::Log> = get_logs(app_state.clone(), app_id.clone()).await.unwrap();
-        let mut logs: Vec<structs::Log> = logs
-            .into_iter()
-            .filter(|log| {
-                if types.is_none() {
-                    return true;
-                }
-                let types = types.clone().unwrap();
-                let type_ = log.type_.clone().unwrap();
-                return types.contains(&type_);
-            })
-            .collect();
-        logs.sort_by(|a, b| {
-            let a_timestamp = a.timestamp.clone().unwrap();
-            let b_timestamp = b.timestamp.clone().unwrap();
-            return a_timestamp.cmp(&b_timestamp);
-        });
-        res_logs.insert(app_id, logs);
-    }
+    let page_id = body.page_id;
+    let page_size = body.page_size;
+    let page_amount = body.page_amount;
+    let result = get_logs(
+        app_state.clone(),
+        app_ids.clone(),
+        types,
+        page_id,
+        page_size,
+        page_amount,
+    )
+    .await
+    .unwrap();
+    let logs: Vec<structs::Log> = result.1;
+    let count = result.0;
 
     let json_response = serde_json::json!({
         "status": "success",
-        "logs": res_logs
+        "logs": logs,
+        "next_elements": count,
     });
 
     return Json(json_response);
@@ -63,21 +60,42 @@ pub async fn get_logs_handler(
 
 async fn get_logs(
     app_state: Arc<AppState>,
-    app_id: String,
-) -> Result<Vec<structs::Log>, mongodb::error::Error> {
+    app_ids: Option<Vec<String>>,
+    types: Option<Vec<String>>,
+    page_id: u64,
+    page_size: u64,
+    page_amount: u64,
+) -> Result<(u64, Vec<structs::Log>), mongodb::error::Error> {
     let db = &app_state.db;
     let collection: mongodb::Collection<Document> = db.collection("logs");
 
     // Do not get logs with deleted field
+    let skip: u64 = page_size * page_id;
+    let limit = page_size * page_amount;
+    let mut filter = doc! {
+        // Check if app_id is in target_apps
+        "app_id": {
+            "$in": app_ids
+        },
+        "deleted": {
+            "$exists": false
+        }
+    };
+    if types.is_some() {
+        let types = types.unwrap();
+        let types_filter = doc! {
+            "$in": types
+        };
+        filter.insert("type_", types_filter);
+    }
     let mut cursor = collection
         .find(
-            doc! {
-                "app_id": app_id,
-                "deleted": {
-                    "$exists": false
-                }
-            },
-            None,
+            filter.clone(),
+            mongodb::options::FindOptions::builder()
+                .sort(doc! { "timestamp": -1 })
+                .skip(skip)
+                .limit(limit as i64)
+                .build(),
         )
         .await?;
 
@@ -99,5 +117,9 @@ async fn get_logs(
         result.push(log);
     }
 
-    return Ok(result);
+    let count =
+        (collection.count_documents(filter, None).await.unwrap() - skip) as i64 - limit as i64;
+    let count = if count < 0 { 0 } else { count } as u64;
+
+    return Ok((count, result));
 }
