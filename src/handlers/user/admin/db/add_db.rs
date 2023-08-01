@@ -13,7 +13,7 @@ use crate::{
 };
 
 #[derive(Deserialize)]
-pub struct CreateSericeInput {
+pub struct AddDbInput {
     token: String,
     name: String,
     connection_string: String,
@@ -21,7 +21,7 @@ pub struct CreateSericeInput {
 
 pub async fn add_db_handler(
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<CreateSericeInput>,
+    Json(body): Json<AddDbInput>,
 ) -> impl IntoResponse {
     let token = body.token;
     let valid = check_auth_token(app_state.clone(), token.clone());
