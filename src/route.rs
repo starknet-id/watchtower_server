@@ -104,10 +104,18 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             "/edit_db",
             post(handlers::user::admin::db::edit_db::edit_db_handler),
         )
+        .route(
+            "/delete_db",
+            delete(handlers::user::admin::db::delete_db::delete_db_handler),
+        )
+        .route(
+            "/check_db_connection",
+            post(handlers::user::admin::db::check_db_connection::check_db_connection_handler),
+        )
         // Logs user side
         .route(
             "/get_logs",
-            post(handlers::logs_user_side::get_logs::get_logs_handler),
+            delete(handlers::logs_user_side::get_logs::get_logs_handler),
         )
         // Admin logs user side
         .route(

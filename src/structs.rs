@@ -57,4 +57,6 @@ pub struct Database {
     pub _id: Option<String>,
     pub name: String,
     pub connection_string: String,
+    pub status: String,
+    pub collections: Vec<String>,
 }
