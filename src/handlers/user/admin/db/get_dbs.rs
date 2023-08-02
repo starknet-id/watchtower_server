@@ -75,12 +75,20 @@ async fn get_dbs(
             .unwrap()
             .as_str()
             .unwrap();
-        let service = structs::Database {
+        let status = doc.get("status").unwrap().unwrap().as_str().unwrap();
+        let collections = doc.get("collections").unwrap().unwrap().as_array().unwrap();
+        let collections_cursor = collections.into_iter();
+        let collections_result: Vec<String> = collections_cursor
+            .map(|collection| collection.unwrap().as_str().unwrap().to_string())
+            .collect();
+        let database = structs::Database {
             _id: Some(_id.to_hex()),
             name: db_name.to_string(),
             connection_string: connection_string.to_string(),
+            status: status.to_string(),
+            collections: collections_result,
         };
-        result.push(service);
+        result.push(database);
     }
 
     return Ok(result);

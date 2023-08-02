@@ -1,27 +1,29 @@
 use std::sync::Arc;
 
 use axum::{extract::State, response::IntoResponse, Json};
-use mongodb::bson::doc;
+use mongodb::{
+    bson::{doc, Document},
+    Collection,
+};
 use serde::Deserialize;
 
 use crate::{
     utils::{
         check_auth_token::check_auth_token, get_token_data::get_token_data,
-        has_permission::has_permission, user::db::update_db_datas::update_db_datas,
+        has_permission::has_permission,
     },
     AppState,
 };
 
 #[derive(Deserialize)]
-pub struct AddDbInput {
+pub struct DeleteDbInput {
     token: String,
-    name: String,
-    connection_string: String,
+    db_id: String,
 }
 
-pub async fn add_db_handler(
+pub async fn delete_db_handler(
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<AddDbInput>,
+    Json(body): Json<DeleteDbInput>,
 ) -> impl IntoResponse {
     let token = body.token;
     let valid = check_auth_token(app_state.clone(), token.clone());
@@ -54,26 +56,15 @@ pub async fn add_db_handler(
         return Json(json_response);
     }
 
-    let db_name = body.name;
-    let connection_string = body.connection_string;
+    let db_id = mongodb::bson::oid::ObjectId::parse_str(&body.db_id).unwrap();
 
-    // insert into mongodb
-    let app = doc! { "name": db_name.clone(), "connection_string": connection_string.clone(), "status": "connecting", "collections": []};
     let db = &app_state.db;
-    let collection = db.collection("databases");
-    let res = collection.insert_one(app, None).await.unwrap();
-    let db_id = res.inserted_id.as_object_id().unwrap().to_hex();
-
-    // Do not wait for the update to finish before returning
-    tokio::spawn(update_db_datas(
-        collection,
-        connection_string.to_string(),
-        db_name.to_string(),
-        db_id.clone(),
-    ));
-
+    let collection: Collection<Document> = db.collection("databases");
+    collection
+        .delete_one(doc! {"_id": db_id}, None)
+        .await
+        .unwrap();
     return Json(serde_json::json!({
         "status": "success",
-        "_id": db_id,
     }));
 }
