@@ -13,14 +13,15 @@ use crate::{
 };
 
 #[derive(Deserialize)]
-pub struct CreateServiceInput {
+pub struct AddDbInput {
     token: String,
-    app_name: String,
+    name: String,
+    connection_string: String,
 }
 
-pub async fn create_service_handler(
+pub async fn add_db_handler(
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<CreateServiceInput>,
+    Json(body): Json<AddDbInput>,
 ) -> impl IntoResponse {
     let token = body.token;
     let valid = check_auth_token(app_state.clone(), token.clone());
@@ -53,19 +54,20 @@ pub async fn create_service_handler(
         return Json(json_response);
     }
 
-    let app_name = body.app_name;
+    let db_name = body.name;
+    let connection_string = body.connection_string;
 
     // insert into mongodb
-    let app = doc! { "app_name": app_name };
+    let app = doc! { "name": db_name, "connection_string": connection_string };
     let db = &app_state.db;
     let res = db
-        .collection("services")
+        .collection("databases")
         .insert_one(app, None)
         .await
         .unwrap();
-    let service_id = res.inserted_id.as_object_id().unwrap().to_hex();
+    let db_id = res.inserted_id.as_object_id().unwrap().to_hex();
     return Json(serde_json::json!({
         "status": "success",
-        "_id": service_id,
+        "_id": db_id,
     }));
 }

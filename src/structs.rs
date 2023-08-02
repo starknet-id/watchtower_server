@@ -51,3 +51,10 @@ pub struct Type {
     pub notifications: Vec<String>,
     pub parents: Vec<String>,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Database {
+    pub _id: Option<String>,
+    pub name: String,
+    pub connection_string: String,
+}

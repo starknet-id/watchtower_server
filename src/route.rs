@@ -92,6 +92,18 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             "/set_telegram_chat",
             post(handlers::user::admin::set_telegram_chat::set_telegram_chat_handler),
         )
+        .route(
+            "/add_db",
+            post(handlers::user::admin::db::add_db::add_db_handler),
+        )
+        .route(
+            "/get_dbs",
+            post(handlers::user::admin::db::get_dbs::get_dbs_handler),
+        )
+        .route(
+            "/edit_db",
+            post(handlers::user::admin::db::edit_db::edit_db_handler),
+        )
         // Logs user side
         .route(
             "/get_logs",
