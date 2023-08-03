@@ -1,10 +1,13 @@
 use std::sync::Arc;
 
 use axum::{extract::State, response::IntoResponse, Json};
-use mongodb::bson::{doc, Document};
+use mongodb::{
+    bson::{doc, Document},
+    Collection,
+};
 
 use crate::{
-    structs,
+    structs::{self},
     utils::{
         check_auth_token::check_auth_token, get_token_data::get_token_data,
         has_permission::has_permission,
@@ -81,12 +84,36 @@ async fn get_dbs(
         let collections_result: Vec<String> = collections_cursor
             .map(|collection| collection.unwrap().as_str().unwrap().to_string())
             .collect();
+        // Get last save
+        let save_collection: Collection<Document> = db.collection("db_saves");
+        let last_save = save_collection
+            .find_one(
+                doc! {"db_id": _id.clone()},
+                mongodb::options::FindOneOptions::builder()
+                    .sort(doc! {"_id": -1})
+                    .build(),
+            )
+            .await
+            .unwrap();
         let database = structs::Database {
             _id: Some(_id.to_hex()),
             name: db_name.to_string(),
             connection_string: connection_string.to_string(),
             status: status.to_string(),
             collections: collections_result,
+            last_save: if last_save.is_some() {
+                Some(
+                    last_save
+                        .unwrap()
+                        .get("time")
+                        .unwrap()
+                        .as_i64()
+                        .unwrap()
+                        .to_owned(),
+                )
+            } else {
+                None
+            },
         };
         result.push(database);
     }
