@@ -115,7 +115,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         // Logs user side
         .route(
             "/get_logs",
-            delete(handlers::logs_user_side::get_logs::get_logs_handler),
+            post(handlers::logs_user_side::get_logs::get_logs_handler),
         )
         // Admin logs user side
         .route(
