@@ -8,7 +8,7 @@ pub async fn save_db(
     client_connection_string: String,
     db_name: String,
     db_id: ObjectId,
-) {
+) -> Result<(), String> {
     // Download client database and store it in the db_saves folder
     // Name it using the db_id and the current date
     // Then save the path in the db_saves collection
@@ -25,8 +25,19 @@ pub async fn save_db(
         .output();
 
     if output.is_err() {
-        println!("Error while saving db: {}", output.err().unwrap());
-        return;
+        let error = format!("Error while saving db: {}", output.err().unwrap());
+        println!("{}", error);
+        return Err(error);
+    }
+
+    let output = output.unwrap();
+    if !output.status.success() {
+        let error = format!(
+            "Error while saving db: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        println!("{}", error);
+        return Err(error);
     }
 
     let collection: Collection<Document> = db.collection("db_saves");
@@ -36,4 +47,6 @@ pub async fn save_db(
     };
 
     collection.insert_one(document, None).await.unwrap();
+
+    return Ok(());
 }

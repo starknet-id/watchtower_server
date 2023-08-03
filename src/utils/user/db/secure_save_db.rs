@@ -34,15 +34,20 @@ pub async fn secure_save_db(
         db_id.to_hex(),
     )
     .await;
-
     if res.client_db.is_some() {
-        save_db(
+        let res2 = save_db(
             db,
             connection_string.to_string(),
             db_name.to_string(),
             db_id,
         )
         .await;
+        if res2.is_err() {
+            return CheckDbRes {
+                success: false,
+                message: res2.err().unwrap(),
+            };
+        }
     }
     return CheckDbRes {
         success: res.success,
