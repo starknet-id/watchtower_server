@@ -8,6 +8,10 @@ services:
     command: ./target/release/watch-tower
     ports:
       - 8000:8000
+    deploy:
+      resources:
+        limits:
+          memory: 4g  # increase limit to 4GB
 
   nginx:
     image: valian/docker-nginx-auto-ssl
@@ -20,6 +24,10 @@ services:
     environment:
       ALLOWED_DOMAINS: "api.watchtower.starknet.id"
       SITES: "api.watchtower.starknet.id=watch_tower_server:8000"
+    deploy:
+      resources:
+        limits:
+          memory: 1g  # increase limit to 1GB
 
 volumes:
   ssl_data:
