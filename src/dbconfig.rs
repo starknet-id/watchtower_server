@@ -2,7 +2,15 @@ use crate::config::Config;
 
 pub async fn config(config: Config, client: mongodb::Client) -> bool {
     println!("🔧 Checking database configuration");
-    let databases = client.list_database_names(None, None).await.unwrap();
+    let databases = client.list_database_names(None, None).await;
+
+    if databases.is_err() {
+        println!("❌ Failed to connect to client");
+        println!("{}", databases.err().unwrap());
+        return false;
+    }
+
+    let databases = databases.unwrap();
     let database_name = config.database.name;
     let mut found = false;
     println!("📙 Databases:");
