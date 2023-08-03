@@ -94,8 +94,13 @@ pub async fn add_message_handler(
             None,
         )
         .await
-        .unwrap()
         .unwrap();
+
+    if service.is_none() {
+        return Err((StatusCode::INTERNAL_SERVER_ERROR, "This service has been deleted (the app_id is valid for the specified token but the service doesn't exist)").into_response());
+    }
+
+    let service = service.unwrap();
 
     let colllection: mongodb::Collection<Document> = db.collection("types");
     let type_ = colllection
