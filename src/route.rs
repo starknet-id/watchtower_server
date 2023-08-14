@@ -123,8 +123,12 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route(
             "/delete_save",
             delete(handlers::user::admin::db::delete_save::delete_save_handler),
-        
         )
+        .route(
+            "/download_save",
+            get(handlers::user::admin::db::download_save::download_save_handler),
+        )
+
         // Logs user side
         .route(
             "/get_logs",
