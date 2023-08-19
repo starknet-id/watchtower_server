@@ -59,4 +59,12 @@ pub struct Database {
     pub connection_string: String,
     pub status: String,
     pub collections: Vec<String>,
+    pub last_save: Option<i64>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DbSave {
+    pub _id: String,
+    pub db_id: String,
+    pub timestamp: i64,
 }

@@ -4,6 +4,9 @@ FROM rust:latest
 # Set the working directory
 WORKDIR .
 
+# Install mongodb database tools
+RUN sudo apt install ./dependencies/mongodb-database-tools-ubuntu1604-x86_64-100.7.4.deb
+
 # Install protobuf compiler (protoc)
 RUN apt-get update && apt-get install -y protobuf-compiler
 
