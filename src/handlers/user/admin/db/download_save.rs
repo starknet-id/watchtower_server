@@ -107,7 +107,7 @@ pub async fn download_save_handler(
     let body = StreamBody::new(stream);
 
     let headers = [
-        (header::CONTENT_TYPE, "text/toml; charset=utf-8"),
+        (header::CONTENT_TYPE, "application/zip"),
         (
             header::CONTENT_DISPOSITION,
             "attachment; filename=\"save.zip\"",
