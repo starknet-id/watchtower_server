@@ -112,6 +112,23 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             "/check_db_connection",
             post(handlers::user::admin::db::check_db_connection::check_db_connection_handler),
         )
+        .route(
+            "/save_db",
+            post(handlers::user::admin::db::save_db::save_db_handler),
+        )
+        .route(
+            "/get_db_saves",
+            post(handlers::user::admin::db::get_db_saves::get_db_saves_handler),
+        )
+        .route(
+            "/delete_save",
+            delete(handlers::user::admin::db::delete_save::delete_save_handler),
+        )
+        .route(
+            "/download_save",
+            get(handlers::user::admin::db::download_save::download_save_handler),
+        )
+
         // Logs user side
         .route(
             "/get_logs",

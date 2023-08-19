@@ -9,6 +9,7 @@ use super::{check_db::check_db, connect_client::connect_client};
 pub struct UpdateDbRes {
     pub success: bool,
     pub message: string::String,
+    pub client_db: Option<mongodb::Database>,
 }
 
 pub async fn update_db_datas(
@@ -53,11 +54,16 @@ pub async fn update_db_datas(
         .await
         .unwrap();
     return UpdateDbRes {
-        success: true,
+        success: if client.is_err() { false } else { true },
         message: if client.is_err() {
-            client.err().unwrap().to_string()
+            client.clone().err().unwrap().to_string()
         } else {
             "".to_string()
+        },
+        client_db: if client.is_err() {
+            None
+        } else {
+            Some(client.unwrap().database(&db_name))
         },
     };
 }
