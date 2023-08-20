@@ -5,7 +5,9 @@ FROM rust:latest
 WORKDIR .
 
 # Install mongodb database tools
-RUN sudo apt install ./dependencies/mongodb-database-tools-ubuntu1604-x86_64-100.7.4.deb
+RUN wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2204-x86_64-100.8.0.deb && \
+  apt install ./mongodb-database-tools-*.deb && \
+  rm -f mongodb-database-tools-*.deb
 
 # Install protobuf compiler (protoc)
 RUN apt-get update && apt-get install -y protobuf-compiler
