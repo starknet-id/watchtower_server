@@ -15,7 +15,6 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 pub struct LogInput {
     _id: Option<String>,
-    app_id: Option<String>,
     r#type: Option<String>,
     message: String,
     timestamp: Option<i64>,
@@ -24,10 +23,11 @@ pub struct LogInput {
 #[derive(Deserialize)]
 pub struct AddMessageInput {
     token: String,
-    log: LogInput,
+    app_id: Option<String>,
+    logs: Vec<LogInput>,
 }
 
-pub async fn add_message_handler(
+pub async fn add_messages_handler(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<AddMessageInput>,
 ) -> impl IntoResponse {
@@ -39,30 +39,43 @@ pub async fn add_message_handler(
         return Err((StatusCode::UNAUTHORIZED, "Invalid token or token expired").into_response());
     }
 
-    let log = body.log;
+    let logs = body.logs;
     let token_data = Some(get_service_token_data(app_state.clone(), token.clone()));
     let token_app_id = token_data.unwrap().unwrap().app_id;
-    let app_id = log.app_id.clone().unwrap();
+    let app_id = body.app_id.clone().unwrap();
 
     if token_app_id != app_id {
         return Err((
             StatusCode::UNAUTHORIZED,
             format!(
                 "You specified a wrong app_id. You specified {} but your token contains {}",
-                log.app_id.clone().unwrap(),
-                token_app_id
+                app_id, token_app_id
             ),
         )
             .into_response());
     }
 
-    Ok(add_message(
-        app_state.clone(),
-        log._id,
-        log.app_id,
-        log.r#type,
-        log.message,
-        log.timestamp,
+    let logs_len = logs.len();
+
+    for log in logs {
+        let res = add_message(
+            app_state.clone(),
+            log._id,
+            Some(app_id.clone()),
+            log.r#type,
+            log.message,
+            log.timestamp,
+        )
+        .await;
+
+        if res.is_err() {
+            return Ok(res);
+        }
+    }
+
+    return Err((
+        StatusCode::OK,
+        format!("Successfully added {} logs to the database", logs_len),
     )
-    .await)
+        .into_response());
 }
