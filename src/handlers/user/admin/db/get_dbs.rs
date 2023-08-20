@@ -95,6 +95,13 @@ async fn get_dbs(
             )
             .await
             .unwrap();
+        // Message can not be in the database
+        let message = if doc.get("message").unwrap().is_none() {
+            ""
+        } else {
+            doc.get("message").unwrap().unwrap().as_str().unwrap()
+        };
+
         let database = structs::Database {
             _id: Some(_id.to_hex()),
             name: db_name.to_string(),
@@ -114,6 +121,7 @@ async fn get_dbs(
             } else {
                 None
             },
+            message: message.to_string(),
         };
         result.push(database);
     }

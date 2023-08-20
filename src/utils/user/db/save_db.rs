@@ -19,7 +19,6 @@ pub async fn save_db(
         "mongodump --out {} --gzip --db {} --uri \"{}\"",
         out, db_name, client_connection_string
     );
-    println!("{}", command);
 
     let output = std::process::Command::new("cmd")
         .args(&["/C", &command])

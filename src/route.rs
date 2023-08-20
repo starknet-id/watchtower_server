@@ -148,5 +148,9 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
             "/service/add_message",
             post(handlers::logs_service_side::add_message::add_message_handler),
         )
+        .route(
+            "/service/add_messages",
+            post(handlers::logs_service_side::add_messages::add_messages_handler),
+        )
         .with_state(app_state)
 }
