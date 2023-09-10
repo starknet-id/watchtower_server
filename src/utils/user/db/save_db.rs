@@ -15,13 +15,17 @@ pub async fn save_db(
     let current_date = chrono::Utc::now();
     let timestamp = current_date.timestamp_millis();
     let out = format!("db_saves/{}/{}", db_id, timestamp.clone());
-    let command = format!(
-        "mongodump --out {} --gzip --db {} --uri \"{}\"",
-        out, db_name, client_connection_string
-    );
 
-    let output = std::process::Command::new("cmd")
-        .args(&["/C", &command])
+    let output = std::process::Command::new("mongodump")
+        .args(&[
+            "--out",
+            &out,
+            "--gzip",
+            "--db",
+            &db_name,
+            "--uri",
+            &client_connection_string,
+        ])
         .output();
 
     if output.is_err() {
@@ -34,7 +38,7 @@ pub async fn save_db(
     if !output.status.success() {
         let error = format!(
             "Error while saving db: {}",
-            String::from_utf8_lossy(&output.stderr)
+            String::from_utf8_lossy(&output.stderr),
         );
         println!("{}", error);
         return Err(error);
