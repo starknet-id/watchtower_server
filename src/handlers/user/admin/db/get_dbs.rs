@@ -101,6 +101,12 @@ async fn get_dbs(
         } else {
             doc.get("message").unwrap().unwrap().as_str().unwrap()
         };
+        // Custom name can not be in the database
+        let custom_name = if doc.get("custom_name").unwrap().is_none() {
+            db_name
+        } else {
+            doc.get("custom_name").unwrap().unwrap().as_str().unwrap()
+        };
 
         let database = structs::Database {
             _id: Some(_id.to_hex()),
@@ -122,6 +128,7 @@ async fn get_dbs(
                 None
             },
             message: message.to_string(),
+            custom_name: custom_name.to_string(),
         };
         result.push(database);
     }
