@@ -20,6 +20,7 @@ pub struct EditDbInput {
     token: String,
     db_id: String,
     name: String,
+    custom_name: String,
     connection_string: String,
 }
 
@@ -61,6 +62,7 @@ pub async fn edit_db_handler(
     let db_id = mongodb::bson::oid::ObjectId::parse_str(&body.db_id).unwrap();
     let db_name = body.name;
     let connection_string = body.connection_string;
+    let custom_name = body.custom_name;
 
     let db = &app_state.db;
     let collection: Collection<Document> = db.collection("databases");
@@ -70,6 +72,7 @@ pub async fn edit_db_handler(
             doc! {"$set": {
                 "name": db_name.clone(),
                 "connection_string": connection_string.clone(),
+                "custom_name": custom_name.clone(),
             }},
             None,
         )

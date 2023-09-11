@@ -61,6 +61,7 @@ pub struct Database {
     pub collections: Vec<String>,
     pub last_save: Option<i64>,
     pub message: String,
+    pub custom_name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

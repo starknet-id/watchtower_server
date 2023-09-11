@@ -58,7 +58,7 @@ pub async fn add_db_handler(
     let connection_string = body.connection_string;
 
     // insert into mongodb
-    let app = doc! { "name": db_name.clone(), "connection_string": connection_string.clone(), "status": "connecting", "collections": []};
+    let app = doc! { "name": db_name.clone(), "custom_name": db_name.clone(), "connection_string": connection_string.clone(), "status": "connecting", "collections": []};
     let db = &app_state.db;
     let collection = db.collection("databases");
     let res = collection.insert_one(app, None).await.unwrap();
