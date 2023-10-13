@@ -1,4 +1,5 @@
 mod config;
+mod cron;
 mod dbconfig;
 mod filesconfig;
 mod handlers;
@@ -7,19 +8,18 @@ mod route;
 mod structs;
 mod userconfig;
 mod utils;
-
-use config::Config;
-use std::sync::Arc;
-
+use crate::cron::cron::start_cron;
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
     HeaderValue, Method,
 };
+use config::Config;
 use dotenv::dotenv;
-use route::create_router;
-use tower_http::cors::CorsLayer;
-
 use mongodb::{options::ClientOptions, Client};
+use route::create_router;
+use std::sync::Arc;
+use std::thread;
+use tower_http::cors::CorsLayer;
 
 #[derive(Debug)]
 pub struct AppState {
@@ -74,11 +74,18 @@ async fn main() {
         ])
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let app = create_router(Arc::new(AppState {
-        db: db,
+    let app_state = Arc::new(AppState {
+        db: db.clone(),
         conf: config.clone(),
-    }))
-    .layer(cors);
+    });
+
+    let app = create_router(app_state.clone()).layer(cors);
+
+    // Start cron
+    thread::spawn(move || {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(start_cron(app_state.clone()));
+    });
 
     println!("🚀 Server started successfully");
     axum::Server::bind(&"0.0.0.0:8000".parse().unwrap())

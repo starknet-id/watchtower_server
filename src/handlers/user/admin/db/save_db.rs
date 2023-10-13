@@ -76,6 +76,7 @@ pub async fn save_db_handler(
         connection_string.to_string(),
         db_name.to_string(),
         db_id,
+        true,
     )
     .await;
 

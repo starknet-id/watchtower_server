@@ -69,4 +69,5 @@ pub struct DbSave {
     pub _id: String,
     pub db_id: String,
     pub timestamp: i64,
+    pub manual: bool,
 }

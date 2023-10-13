@@ -17,6 +17,7 @@ pub async fn secure_save_db(
     connection_string: String,
     db_name: String,
     db_id: ObjectId,
+    manual: bool,
 ) -> CheckDbRes {
     // Update db status
     collection
@@ -40,6 +41,7 @@ pub async fn secure_save_db(
             connection_string.to_string(),
             db_name.to_string(),
             db_id,
+            manual,
         )
         .await;
         if res2.is_err() {
