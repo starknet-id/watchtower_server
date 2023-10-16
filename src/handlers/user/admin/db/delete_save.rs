@@ -1,16 +1,13 @@
 use std::sync::Arc;
 
 use axum::{extract::State, response::IntoResponse, Json};
-use mongodb::{
-    bson::{doc, Document},
-    Collection,
-};
+use mongodb::bson::doc;
 use serde::Deserialize;
 
 use crate::{
     utils::{
         check_auth_token::check_auth_token, get_token_data::get_token_data,
-        has_permission::has_permission,
+        has_permission::has_permission, user::db::delete_save,
     },
     AppState,
 };
@@ -58,27 +55,8 @@ pub async fn delete_save_handler(
 
     let save_id = mongodb::bson::oid::ObjectId::parse_str(&body.save_id).unwrap();
 
-    let db = &app_state.db;
-    let collection: Collection<Document> = db.collection("db_saves");
-    // Get save
-    let save = collection
-        .find_one(doc! {"_id": save_id}, None)
-        .await
-        .unwrap()
-        .unwrap();
-    let db_id = save.get_object_id("db_id").unwrap();
-    let time = save.get_i64("time").unwrap();
-    // Delete file
-    let path = format!("db_saves/{}/{}", db_id, time);
-    let res = std::fs::remove_dir_all(path);
-    if res.is_err() {
-        println!("Error deleting db save: {}", res.err().unwrap());
-    }
-    // Delete save
-    collection
-        .delete_one(doc! {"_id": save_id}, None)
-        .await
-        .unwrap();
+    delete_save::delete_save(&app_state.db.clone(), save_id).await;
+
     return Json(serde_json::json!({
         "status": "success",
     }));

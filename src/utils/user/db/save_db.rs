@@ -8,6 +8,7 @@ pub async fn save_db(
     client_connection_string: String,
     db_name: String,
     db_id: ObjectId,
+    manual: bool,
 ) -> Result<(), String> {
     // Download client database and store it in the db_saves folder
     // Name it using the db_id and the current date
@@ -30,7 +31,6 @@ pub async fn save_db(
 
     if output.is_err() {
         let error = format!("Error while saving db: {}", output.err().unwrap());
-        println!("{}", error);
         return Err(error);
     }
 
@@ -40,7 +40,6 @@ pub async fn save_db(
             "Error while saving db: {}",
             String::from_utf8_lossy(&output.stderr),
         );
-        println!("{}", error);
         return Err(error);
     }
 
@@ -48,6 +47,7 @@ pub async fn save_db(
     let document = doc! {
         "db_id": db_id,
         "time": timestamp,
+        "manual": manual,
     };
 
     collection.insert_one(document, None).await.unwrap();

@@ -87,10 +87,17 @@ async fn get_saves(
         let _id = doc.get("_id").unwrap().unwrap().as_object_id().unwrap();
         let db_id = doc.get("db_id").unwrap().unwrap().as_object_id().unwrap();
         let timestamp = doc.get("time").unwrap().unwrap().as_i64().unwrap();
+        let manual = doc.get("manual").unwrap();
+        let manual = if manual.is_some() {
+            manual.unwrap().as_bool().unwrap()
+        } else {
+            true
+        };
         let save = structs::DbSave {
             _id: _id.to_hex(),
             db_id: db_id.to_hex(),
             timestamp: timestamp,
+            manual: manual,
         };
         result.push(save);
     }
