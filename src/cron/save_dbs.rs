@@ -12,8 +12,14 @@ pub async fn save_dbs(app_state: Arc<AppState>) -> Result<(), mongodb::error::Er
     while databases_cursor.advance().await? {
         let doc = databases_cursor.current();
         let db_id = doc.get("_id").unwrap().unwrap().as_object_id().unwrap();
-        let custom_name = doc.get("custom_name").unwrap().unwrap().as_str().unwrap();
         let db_name = doc.get("name").unwrap().unwrap().as_str().unwrap();
+        // Optional field
+        let custom_name = doc
+            .get("custom_name")
+            .unwrap()
+            .unwrap_or(doc.get("name").unwrap().unwrap())
+            .as_str()
+            .unwrap_or(db_name);
         let connection_string = doc
             .get("connection_string")
             .unwrap()
