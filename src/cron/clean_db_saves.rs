@@ -49,7 +49,7 @@ pub async fn clean_db_saves(app_state: Arc<AppState>) -> Result<(), mongodb::err
         if delta < month && delta > week {
             if date.day() % 7 != 1 {
                 println!(
-                    "Deleting save {} from db {} ({} created days ago - {})",
+                    "Deleting save {} from db {} (created {} days ago - {})",
                     _id,
                     db_id,
                     delta / day,
