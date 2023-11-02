@@ -22,6 +22,8 @@ pub async fn save_db(
             "--out",
             &out,
             "--gzip",
+            "--authenticationDatabase",
+            "admin",
             "--db",
             &db_name,
             "--uri",
