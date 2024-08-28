@@ -25,6 +25,7 @@ toml = "0.7.5"
 tokio-util = "0.7.8"
 zip = "0.6.6"
 walkdir = "2.3.3"
+futures = "0.3.30"
 
 [target.x86_64-unknown-linux-musl]
 linker = "rust-lld"
