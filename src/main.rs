@@ -1,3 +1,4 @@
+mod cleaner;
 mod config;
 mod cron;
 mod dbconfig;
@@ -78,6 +79,13 @@ async fn main() {
         db: db.clone(),
         conf: config.clone(),
     });
+
+    let clean_result = cleaner::clean(app_state.clone()).await;
+
+    if clean_result != true {
+        println!("❌ Failed to clean services");
+        return;
+    }
 
     let app = create_router(app_state.clone()).layer(cors);
 
