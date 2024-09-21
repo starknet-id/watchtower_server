@@ -22,6 +22,7 @@ pub struct EditDbInput {
     name: String,
     custom_name: String,
     connection_string: String,
+    authentication_database: String,
 }
 
 pub async fn edit_db_handler(
@@ -73,6 +74,7 @@ pub async fn edit_db_handler(
                 "name": db_name.clone(),
                 "connection_string": connection_string.clone(),
                 "custom_name": custom_name.clone(),
+                "authentication_database": body.authentication_database.clone(),
             }},
             None,
         )

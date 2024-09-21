@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use mongodb::{bson::Document, Collection};
+use mongodb::{
+    bson::{Document, RawBsonRef},
+    Collection,
+};
 
 use crate::{utils::user::db::save_db::save_db, AppState};
 
@@ -13,6 +16,14 @@ pub async fn save_dbs(app_state: Arc<AppState>) -> Result<(), mongodb::error::Er
         let doc = databases_cursor.current();
         let db_id = doc.get("_id").unwrap().unwrap().as_object_id().unwrap();
         let db_name = doc.get("name").unwrap().unwrap().as_str().unwrap();
+
+        let authentication_database = doc
+            .get("authentication_database")
+            .unwrap()
+            .unwrap_or(RawBsonRef::String("admin"))
+            .as_str()
+            .unwrap();
+
         // Optional field
         let custom_name = doc
             .get("custom_name")
@@ -32,6 +43,7 @@ pub async fn save_dbs(app_state: Arc<AppState>) -> Result<(), mongodb::error::Er
             db_name.to_string(),
             db_id,
             false,
+            authentication_database.to_string(),
         )
         .await;
         if res.is_ok() {
