@@ -70,10 +70,6 @@ pub async fn save_db_handler(
     let connection_string = database.get_str("connection_string").unwrap();
     let db_id = database.get_object_id("_id").unwrap();
 
-    let authentication_database = database
-        .get_str("authentication_database")
-        .unwrap_or("admin");
-
     let res = secure_save_db(
         collection,
         db,
@@ -81,7 +77,6 @@ pub async fn save_db_handler(
         db_name.to_string(),
         db_id,
         true,
-        authentication_database.to_string(),
     )
     .await;
 
