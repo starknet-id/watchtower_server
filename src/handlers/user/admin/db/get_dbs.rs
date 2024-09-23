@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{extract::State, response::IntoResponse, Json};
 use mongodb::{
-    bson::{doc, Document, RawBsonRef},
+    bson::{doc, Document},
     Collection,
 };
 
@@ -78,12 +78,6 @@ async fn get_dbs(
             .unwrap()
             .as_str()
             .unwrap();
-        let authentication_database = doc
-            .get("authentication_database")
-            .unwrap()
-            .unwrap_or(RawBsonRef::String("admin"))
-            .as_str()
-            .unwrap();
         let status = doc.get("status").unwrap().unwrap().as_str().unwrap();
         let collections = doc.get("collections").unwrap().unwrap().as_array().unwrap();
         let collections_cursor = collections.into_iter();
@@ -135,7 +129,6 @@ async fn get_dbs(
             },
             message: message.to_string(),
             custom_name: custom_name.to_string(),
-            authentication_database: authentication_database.to_string(),
         };
         result.push(database);
     }
